@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INSIDE WORK | Monitoramento Ético</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            /* Cores Sólidas INSIDE WORK */
+            --primary: #2563eb;       /* Azul */
+            --bg-dark: #1e1e24;       /* Preto */
+            --warning: #f59e0b;       /* Laranja */
+            --success: #15803d;       /* Verde */
+            --danger: #EF4444;        /* Vermelho Alerta */
+            --bg-app: #fafafa;        /* Fundo App */
+            --card-bg: #ffffff;       /* Fundo Cards/Branco */
+            --text-main: #1e1e24;     /* Texto Principal (Preto) */
+            --text-muted: #64748B;    /* Texto Secundário */
+            --border: #E2E8F0;        /* Bordas */
+
+            /* Degradês INSIDE WORK */
+            --grad-blue: linear-gradient(135deg, #2563eb, #298fb8);
+            --grad-black: linear-gradient(135deg, #1e1e24, #212121);
+            --grad-orange: linear-gradient(135deg, #f59e0b, #f57c00);
+            --grad-white: linear-gradient(135deg, #fafafa, #ffffff);
+            --grad-green: linear-gradient(135deg, #15803d, #449f49);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { height: 100vh; background-color: var(--bg-app); color: var(--text-main); overflow: hidden; }
+
+        /* ================= TELA DE LOGIN ================= */
+        #auth-screen { display: flex; height: 100vh; width: 100vw; background: var(--bg-app); position: absolute; z-index: 100; transition: opacity 0.5s; }
+        .auth-left { flex: 1; background: var(--grad-black); color: white; display: flex; flex-direction: column; justify-content: center; padding: 4rem; position: relative; overflow: hidden; }
+        .auth-left h1 { font-size: 3rem; margin-bottom: 1rem; position: relative; z-index: 2; display: flex; align-items: center; gap: 15px;}
+        .auth-left p { font-size: 1.2rem; opacity: 0.8; max-width: 500px; line-height: 1.6; position: relative; z-index: 2; }
+        
+        .auth-right { flex: 1; background: var(--grad-white); display: flex; justify-content: center; align-items: center; padding: 2rem; }
+        .auth-box { width: 100%; max-width: 420px; }
+        .auth-tabs { display: flex; margin-bottom: 2rem; border-bottom: 2px solid var(--border); }
+        .auth-tab { flex: 1; text-align: center; padding: 1rem; cursor: pointer; font-weight: 600; color: var(--text-muted); transition: 0.3s; }
+        .auth-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); margin-bottom: -2px; }
+        
+        .auth-form { display: none; flex-direction: column; gap: 1.2rem; animation: fadeIn 0.4s; }
+        .auth-form.active { display: flex; }
+        .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .input-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+        .input-group input, .input-group select, .input-group textarea { padding: 0.8rem 1rem; border: 1px solid var(--border); border-radius: 8px; outline: none; font-size: 1rem; font-family: 'Inter', sans-serif;}
+        .input-group textarea { resize: vertical; min-height: 100px; }
+        
+        .btn-submit { background: var(--primary); color: white; padding: 1rem; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 1rem; transition: 0.2s;}
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        
+        /* ================= ESTRUTURA GERAL ================= */
+        #app-screen { display: none; height: 100vh; width: 100vw; }
+        .sidebar { width: 280px; background: var(--grad-black); color: white; display: flex; flex-direction: column; }
+        
+        .nav-menu { list-style: none; padding: 24px 12px; flex-grow: 1; }
+        .nav-item { padding: 12px 16px; margin-bottom: 4px; cursor: pointer; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 12px; color: #CBD5E1; font-weight: 500; }
+        .nav-item.active { background: var(--grad-blue); color: white; }
+
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; position: relative; }
+        .header { height: 72px; background-color: var(--card-bg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
+        .user-profile { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; }
+        .btn-logout { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-left: 20px; transition: 0.2s; }
+        .btn-logout:hover { background: var(--danger); color: white; }
+
+        .active-integration-badge { background: #eff6ff; color: #1d4ed8; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: none; align-items: center; gap: 6px; border: 1px solid #bfdbfe;}
+
+        /* ================= COMPONENTES DASHBOARD ================= */
+        .dashboard-container { padding: 32px; display: none; max-width: 1400px; margin: 0 auto; width: 100%; animation: fadeIn 0.4s; }
+        .dashboard-container.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .page-header h1 { font-size: 1.8rem; color: var(--text-main); }
+        .page-header p { color: var(--text-muted); margin-top: 4px; }
+        
+        .bento-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; margin-bottom: 24px; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 24px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+        .col-span-4 { grid-column: span 4; }
+        .col-span-6 { grid-column: span 6; }
+        .col-span-8 { grid-column: span 8; }
+        .col-span-12 { grid-column: span 12; }
+
+        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
+        canvas { max-height: 250px; }
+
+        /* SPS BADGE */
+        .sps-badge { background: var(--grad-green); color: white; padding: 1rem 2rem; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(21, 128, 61, 0.2); }
+        .sps-badge.warning { background: var(--grad-orange); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); }
+        .sps-value { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+        .sps-label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; margin-top: 4px; }
+
+        /* IA RECOMENDACÃO / ALERTAS */
+        .ia-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 5px solid var(--success); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; }
+        .ia-box.alert { background: #fef2f2; border-color: #fecaca; border-left-color: var(--danger); }
+        .ia-header { display: flex; align-items: center; gap: 10px; font-weight: 700; margin-bottom: 8px; font-size: 1.1rem; }
+        .ia-box.alert .ia-header { color: #991b1b; }
+        .ia-box .ia-header { color: #166534; }
+        
+        .request-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; background: var(--bg-app); }
+        .request-info h4 { font-size: 0.95rem; color: var(--text-main); }
+        .request-info p { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+        .btn-sm { padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; border: none; font-weight: bold; cursor: pointer; }
+        
+        .kpi-grid-sps { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .kpi-card-sps { background: var(--bg-app); padding: 1rem; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
+        .kpi-label-sps { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; }
+
+        /* ================= BARRA DE PESQUISA ================= */
+        .search-container { position: relative; width: 100%; max-width: 500px; margin-bottom: 24px; }
+        .search-container input { width: 100%; padding: 14px 14px 14px 45px; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem; outline: none; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .search-container input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.1rem; }
+        
+        .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 8px; margin-top: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 50; display: none; max-height: 250px; overflow-y: auto; }
+        .suggestion-item { padding: 12px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid var(--border); }
+        .suggestion-item:last-child { border-bottom: none; }
+        .suggestion-item:hover { background: var(--bg-app); }
+        .sugg-name { font-weight: 600; color: var(--text-main); font-size: 0.95rem; display: block; }
+        .sugg-role { font-size: 0.75rem; color: var(--text-muted); }
+        .sugg-score { margin-left: auto; font-size: 0.85rem; font-weight: bold; background: var(--bg-app); padding: 4px 8px; border-radius: 4px; }
+
+        /* ================= NOVOS ELEMENTOS ================= */
+        .btn-sos { background: #fef2f2; color: #dc2626; border
